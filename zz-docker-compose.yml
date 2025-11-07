@@ -1,16 +1,72 @@
 services:
 
   zz-traefik:
-    name: zz-traefik
+    container_name: zz-traefik
     image: traefik:latest
     ports:
       - "80:80"
       - "443:443"
+    restart: unless-stopped
+    command:
+      
+      # Entry points - порты 80 и 443 как указано в README
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      
+      # HTTP to HTTPS redirect
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      
+      # Docker provider
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=traefik
+      
+      # Let's Encrypt для автоматических HTTPS сертификатов
+      - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@example.com}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.letsencrypt.acme.caserver=${ACME_CA_SERVER:-https://acme-v02.api.letsencrypt.org/directory}
+      
+      # Логирование
+      - --log.level=${TRAEFIK_LOG_LEVEL:-INFO}
+      - --accesslog=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
   zz-httpbin:
-    name: zz-httpbin
+    container_name: zz-httpbin
     build:
       context: .
       dockerfile: zz-Dockerfile
+    restart: unless-stopped
+    environment:
+      - DEBUG=${DEBUG:-false}
+    networks:
+      - traefik
+      - httpbin
+    # Порт 8080 для внешнего доступа как указано в README
     ports:
       - "8080:80"
+    labels:
+      - "traefik.enable=true"
+      # HttpBin доступен на httpbin.localhost
+      - "traefik.http.routers.httpbin.rule=Host(`httpbin.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.httpbin.entrypoints=websecure"
+      - "traefik.http.routers.httpbin.tls.certresolver=letsencrypt"
+      - "traefik.http.services.httpbin.loadbalancer.server.port=80"
+      
+      # Security middlewares
+      - "traefik.http.routers.httpbin.middlewares=security-headers,rate-limit"
+      
+      # Security headers
+      - "traefik.http.middlewares.security-headers.headers.customresponseheaders.X-Frame-Options=DENY"
+      - "traefik.http.middlewares.security-headers.headers.customresponseheaders.X-Content-Type-Options=nosniff"
+      - "traefik.http.middlewares.security-headers.headers.customresponseheaders.X-XSS-Protection=1; mode=block"
+      - "traefik.http.middlewares.security-headers.headers.customresponseheaders.Strict-Transport-Security=max-age=31536000; includeSubDomains"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/get"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
