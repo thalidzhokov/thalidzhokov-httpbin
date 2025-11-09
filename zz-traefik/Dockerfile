@@ -18,12 +18,12 @@ COPY ./conf/headers.yaml /etc/traefik/conf/headers.yaml
 COPY ./conf/tls.yaml /etc/traefik/conf/tls.yaml
 COPY ./dist.traefik.yaml /tmp/dist.traefik.yaml
 
-# Меняем email в настройках в /etc/traefik/traefik.yml
+# Меняем email в настройках в /traefik.yaml
 # Если ACME_EMAIL не установлен, то устанавливаем test@example.com
 RUN if [ -n "${ACME_EMAIL}" ]; then \
         sed -e "s/your-email@example.com/${ACME_EMAIL}/g" \
-        /tmp/dist.traefik.yaml > /etc/traefik/traefik.yml; \
+        /tmp/dist.traefik.yaml > /traefik.yaml; \
     else \
         sed -e "s/your-email@example.com/test@example.com/g" \
-        /tmp/dist.traefik.yaml > /etc/traefik/traefik.yml; \
+        /tmp/dist.traefik.yaml > /traefik.yaml; \
     fi;

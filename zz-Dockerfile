@@ -5,6 +5,11 @@ LABEL version="0.1"
 LABEL description="Актуальная версия контейнера для httpbin"
 LABEL maintainer="Albert Thalidzhokov <thalidzhokov@gmail.com>"
 
+# Аргументы
+ARG DOMAIN
+ARG CERT_RESOLVER
+
+# Переменные окружения
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Далее докерфайл для httpbin с минимальными изменениями
