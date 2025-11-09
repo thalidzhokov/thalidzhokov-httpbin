@@ -12,6 +12,7 @@ services:
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-letsencrypt:/letsencrypt
 
   zz-httpbin:
     container_name: zz-httpbin
@@ -49,3 +50,8 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
+
+volumes:
+  traefik-letsencrypt:
+    driver: local
+
