@@ -1,0 +1,21 @@
+http:
+  middlewares:
+    SslHeader:
+      headers:
+        AccessControlAllowMethods: 'GET,OPTIONS,PUT,POST,DELETE'
+        AccessControlAllowOriginList:
+          - origin-list-or-null
+        AccessControlMaxAge: 100
+        AddVaryHeader: true
+        BrowserXssFilter: true
+        ContentSecurityPolicy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://fastapi.tiangolo.com data:; worker-src 'self' blob:;
+        ContentTypeNosniff: true
+        CustomFrameOptionsValue: SAMEORIGIN
+        ForceSTSHeader: true
+        FrameDeny: true
+        PermissionsPolicy: vibrate 'self'
+        ReferrerPolicy: same-origin
+        STSIncludeSubdomains: true
+        STSPreload: true
+        STSSeconds: 315360000
+

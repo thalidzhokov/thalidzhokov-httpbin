@@ -12,15 +12,23 @@ ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
 RUN apt update -y
-RUN apt install python3-pip git -y 
-RUN pip3 install --no-cache-dir pipenv
+RUN apt install python3-pip python3-full git -y 
+RUN pip3 install --no-cache-dir --break-system-packages pipenv
+
+# Сначала устанавливаем совместимые версии зависимостей
+RUN pip3 install --no-cache-dir --break-system-packages \
+    gunicorn==20.1.0 \
+    werkzeug==2.0.3 \
+    flask==2.0.3 \
+    markupsafe==2.0.1 \
+    gevent
 
 ADD Pipfile Pipfile.lock /httpbin/
 WORKDIR /httpbin
-RUN /bin/bash -c "pip install --no-cache-dir -r <(pipenv lock -r)"
+RUN /bin/bash -c "pip3 install --no-cache-dir --break-system-packages -r <(pipenv lock -r)"
 
 ADD . /httpbin
-RUN pip3 install --no-cache-dir /httpbin
+RUN pip3 install --no-cache-dir --break-system-packages /httpbin
 
 EXPOSE 80
 

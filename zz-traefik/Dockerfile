@@ -1,0 +1,29 @@
+FROM traefik:latest
+
+LABEL name="zz-traefik"
+LABEL version="0.1"
+LABEL maintainer="Albert Thalidzhokov <thalidzhokov@gmail.com>"
+
+# Аргументы
+ARG ACME_EMAIL
+
+# USER
+RUN whoami
+
+# WORKDIR
+RUN pwd
+
+# Копируем конфиги
+COPY ./conf/headers.yaml /etc/traefik/conf/headers.yaml
+COPY ./conf/tls.yaml /etc/traefik/conf/tls.yaml
+COPY ./dist.traefik.yaml /tmp/dist.traefik.yaml
+
+# Меняем email в настройках в /etc/traefik/traefik.yml
+# Если ACME_EMAIL не установлен, то устанавливаем test@example.com
+RUN if [ -n "${ACME_EMAIL}" ]; then \
+        sed -e "s/your-email@example.com/${ACME_EMAIL}/g" \
+        /tmp/dist.traefik.yaml > /etc/traefik/traefik.yml; \
+    else \
+        sed -e "s/your-email@example.com/test@example.com/g" \
+        /tmp/dist.traefik.yaml > /etc/traefik/traefik.yml; \
+    fi;
