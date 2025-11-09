@@ -44,7 +44,7 @@ services:
       - traefik.http.routers.zz-https.tls=true
       - traefik.http.routers.zz-https.tls.certresolver=${CERT_RESOLVER:-letsencrypt}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/get"]
+      test: ['CMD-SHELL', 'if [ "$(curl -s -o /dev/null -w "%{http_code}" http://localhost/get)" = "200" ]; then exit 0; else exit 1; fi']
       interval: 10s
       timeout: 10s
       retries: 5

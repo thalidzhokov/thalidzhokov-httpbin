@@ -13,6 +13,12 @@ RUN whoami
 # WORKDIR
 RUN pwd
 
+# Обновляем пакеты
+RUN apk update
+
+# Устанавливаем curl
+RUN apk add curl
+
 # Копируем конфиги
 COPY ./conf/headers.yaml /etc/traefik/conf/headers.yaml
 COPY ./conf/tls.yaml /etc/traefik/conf/tls.yaml
